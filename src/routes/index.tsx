@@ -8,7 +8,6 @@ import {
   ChatInput,
   Sidebar,
   WelcomeScreen,
-  TopBanner
 } from '../components'
 import { useConversations, useAppState, store, actions } from '../store'
 import { genAIResponse, type Message } from '../utils'
@@ -322,7 +321,7 @@ function Home() {
 
       {/* Main Content */}
       <div className="flex flex-col flex-1">
-        <TopBanner />
+        {/* <TopBanner /> */}
         {error && (
           <p className="w-full max-w-3xl p-4 mx-auto font-bold text-orange-500">{error}</p>
         )}

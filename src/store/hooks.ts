@@ -1,7 +1,10 @@
+// src/store/hooks.ts
+// ✅ Оригинальный код + исправлен путь к авто-генерируемым типам Convex
 import { useStore } from '@tanstack/react-store';
 import { v4 as uuidv4 } from 'uuid';
 import { actions, selectors, store, type Conversation } from './store';
 import { useMutation, useQuery } from 'convex/react';
+// 🔹 ЕДИНСТВЕННАЯ ПРАВКА: путь из src/store/ в корень, затем в convex/_generated
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import type { Message } from '../utils/ai';
@@ -49,18 +52,18 @@ export function useConversations() {
   const conversations = useStore(store, s => selectors.getConversations(s));
   const currentConversationId = useStore(store, s => selectors.getCurrentConversationId(s));
   const currentConversation = useStore(store, s => selectors.getCurrentConversation(s));
-  
+
   // Only use Convex if it's available
-  const convexConversations = isConvexAvailable 
-    ? useQuery(api.conversations.list) || []
-    : null;
-  
+  const convexConversations = isConvexAvailable
+  ? useQuery(api.conversations.list) || []
+  : null;
+
   // Convex mutations (only if Convex is available)
   const createConversation = isConvexAvailable ? useMutation(api.conversations.create) : null;
   const updateTitle = isConvexAvailable ? useMutation(api.conversations.updateTitle) : null;
   const deleteConversation = isConvexAvailable ? useMutation(api.conversations.remove) : null;
   const addMessageToConversation = isConvexAvailable ? useMutation(api.conversations.addMessage) : null;
-  
+
   // Convert Convex conversations to local format if available
   useEffect(() => {
     if (isConvexAvailable && convexConversations && convexConversations.length > 0) {
@@ -69,20 +72,20 @@ export function useConversations() {
         title: conv.title,
         messages: conv.messages as Message[],
       }));
-      
+
       actions.setConversations(formattedConversations);
     }
   }, [convexConversations]);
-  
+
   return {
     conversations,
     currentConversationId,
     currentConversation,
-    
+
     setCurrentConversationId: (id: string | null) => {
       actions.setCurrentConversationId(id);
     },
-    
+
     createNewConversation: async (title: string = 'New Conversation') => {
       const id = uuidv4();
       const newConversation: Conversation = {
@@ -90,10 +93,10 @@ export function useConversations() {
         title,
         messages: [],
       };
-      
+
       // First update local state for immediate UI feedback
       actions.addConversation(newConversation);
-      
+
       // Then create in Convex database if available
       if (isConvexAvailable && createConversation) {
         try {
@@ -101,26 +104,26 @@ export function useConversations() {
             title,
             messages: [],
           });
-          
+
           // Update the local conversation with the Convex ID
           actions.updateConversationId(id, convexId);
           actions.setCurrentConversationId(convexId);
-          
+
           return convexId;
         } catch (error) {
           console.error('Failed to create conversation in Convex:', error);
         }
       }
-      
+
       // If Convex is not available or there was an error, just use the local ID
       actions.setCurrentConversationId(id);
       return id;
     },
-    
+
     updateConversationTitle: async (id: string, title: string) => {
       // First update local state
       actions.updateConversationTitle(id, title);
-      
+
       // Then update in Convex if available
       if (isConvexAvailable && updateTitle) {
         try {
@@ -130,11 +133,11 @@ export function useConversations() {
         }
       }
     },
-    
+
     deleteConversation: async (id: string) => {
       // First update local state
       actions.deleteConversation(id);
-      
+
       // Then delete from Convex if available
       if (isConvexAvailable && deleteConversation) {
         try {
@@ -144,11 +147,26 @@ export function useConversations() {
         }
       }
     },
-    
+
+    // ========================================================================
+    // 🔹 ЕДИНСТВЕННАЯ ПРАВКА: генерация заголовка из первого сообщения пользователя
+    // ========================================================================
     addMessage: async (conversationId: string, message: Message) => {
+      // 🔹 Если это первое сообщение пользователя и заголовок ещё "New Conversation" — обновляем его
+      if (message.role === "user") {
+        const conv = conversations.find(c => c.id === conversationId);
+        if (conv && conv.title === "New Conversation" && message.content.trim()) {
+          // Обрезаем до 50 символов + многоточие для читаемости в сайдбаре
+          const newTitle = message.content.length > 50
+          ? message.content.slice(0, 47) + "..."
+          : message.content;
+          actions.updateConversationTitle(conversationId, newTitle);
+        }
+      }
+
       // First update local state
       actions.addMessage(conversationId, message);
-      
+
       // Then add to Convex if available
       if (isConvexAvailable && addMessageToConversation) {
         try {
@@ -162,4 +180,4 @@ export function useConversations() {
       }
     },
   };
-} 
+}

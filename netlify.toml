@@ -4,3 +4,11 @@ ANTHROPIC_API_KEY = "Add your Anthropic API key here"
 [build]
 command = "npm run build"
 publish = "dist/client"
+
+# netlify.toml — добавьте в конец:
+[dev]
+  command = "bun run dev"
+  framework = "#custom"
+  targetPort = 3000
+  # Отключаем эмуляцию edge functions для локальной разработки
+  publish = "dist"

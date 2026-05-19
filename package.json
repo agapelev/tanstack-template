@@ -10,16 +10,17 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
+    "@google/generative-ai": "latest",
     "@sentry/react": "^9.5.0",
     "@sentry/vite-plugin": "^3.2.2",
     "@tailwindcss/postcss": "^4.0.7",
     "@tailwindcss/vite": "^4.0.6",
-    "@tanstack/react-router": "^1.157.16",
-    "@tanstack/react-router-devtools": "^1.157.16",
-    "@tanstack/react-start": "^1.157.16",
-    "@tanstack/react-store": "^0.8.0",
-    "@tanstack/router-plugin": "^1.157.16",
-    "@tanstack/store": "^0.8.0",
+    "@tanstack/react-router": "1.157.16",
+    "@tanstack/react-router-devtools": "1.157.16",
+    "@tanstack/react-start": "1.157.16",
+    "@tanstack/react-store": "0.8.0",
+    "@tanstack/router-plugin": "1.157.16",
+    "@tanstack/store": "0.8.0",
     "@types/uuid": "^10.0.0",
     "convex": "^1.20.0",
     "highlight.js": "^11.11.1",
@@ -40,9 +41,15 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^26.0.0",
+    "node-gyp": "^12.3.0",
     "typescript": "^5.7.2",
-    "vite": "^7.0.0",
+    "vite": "^6.3.5",
     "vite-tsconfig-paths": "^6.0.5",
     "web-vitals": "^4.2.4"
+  },
+  "overrides": {
+    "@babel/traverse": "^7.26.10",
+    "@babel/core": "^7.26.10",
+    "@babel/types": "^7.26.10"
   }
 }
